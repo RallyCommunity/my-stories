@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Stories</title>
+
+    <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                Ext.define('CustomApp', {
+    extend: 'Rally.app.App',
+    componentCls: 'app',
+
+    launch: function() {
+        this.add({
+            xtype: 'rallyiterationcombobox',
+            listeners: {
+                select: this._onIterationChanged,
+                ready: this._onIterationsLoaded,
+                scope: this
+            }
+        });
+    },
+
+    _onIterationsLoaded: function() {
+        this.add({
+            xtype: 'rallygrid',
+            width: 500,
+            columnCfgs: [
+                'FormattedID',
+                'Name',
+                'ScheduleState'
+            ],
+            context: this.getContext(),
+            storeConfig: {
+                model: 'userstory',
+                filters: [this._getIterationFilter()]
+            }
+        });
+    },
+
+    _getIterationFilter: function() {
+        return  this.down('rallyiterationcombobox').getQueryFromSelected().and({property: 'Owner',operator: '=',value: this.getContext().getUser()._ref});
+    },
+
+    _onIterationChanged: function() {
+        var grid = this.down('rallygrid');
+        var store = grid.getStore();
+        store.clearFilter(true);
+        store.filter(this._getIterationFilter());
+    }
+});
+
+            Rally.launchApp('CustomApp', {
+                name:"My Stories",
+	            parentRepos:""
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        .app {
+  /* Add app styles here */
+}
+
+    </style>
+</head>
+<body>
+</body>
+</html>
